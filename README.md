@@ -81,7 +81,7 @@ Démarrez le serveur de développement en exécutant le script :
 ```powershell
 python run.py
 ```
-Le serveur démarrera automatiquement sur **[http://127.0.0.1:8000](http://127.0.0.1:8000)**. Ouvrez cette adresse dans votre navigateur préféré !
+Le serveur démarrera automatiquement sur **[http://127.0.0.1:8000](http://127.0.0.1:8001)**. Ouvrez cette adresse dans votre navigateur préféré !
 
 ---
 
