@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de Bord - Digi'innova. Simulation d'Entretien{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div>
+        <h1>Bonjour !</h1>
+        <p style="color: var(--text-secondary); margin-top: 4px;">Bienvenue sur votre espace d'entraînement d'entretien Digi'innova.</p>
+    </div>
+    <a href="/interview/new" class="btn btn-primary">Nouvelle simulation</a>
+</div>
+
+<!-- Grid de Statistiques -->
+<div class="dashboard-stats">
+    <div class="glass-card stat-card">
+        <div class="stat-number">{{ sessions|length }}</div>
+        <div class="stat-label">Simulations créées</div>
+    </div>
+    <div class="glass-card stat-card">
+        <div class="stat-number">
+            {% if total_completed > 0 %}
+                {{ avg_score }}<span style="font-size: 24px; color: var(--text-muted);">/100</span>
+            {% else %}
+                --
+            {% endif %}
+        </div>
+        <div class="stat-label">Score moyen global</div>
+    </div>
+    <div class="glass-card stat-card maroon">
+        <div class="stat-number" style="font-size: 22px; padding: 13px 0; font-family: 'Outfit';">
+            {% if is_demo %}
+                Démo active
+            {% else %}
+                IA Gemini
+            {% endif %}
+        </div>
+        <div class="stat-label">Moteur d'évaluation</div>
+    </div>
+</div>
+
+<!-- Bannière d'avertissement Démo pour configurer .env -->
+{% if is_demo %}
+<div class="demo-banner">
+    <div class="demo-banner-text">
+        <h3>💡 Mode Démo Actif</h3>
+        <p>L'application utilise un simulateur local. Pour activer l'analyse intelligente et personnalisée en temps réel de <strong>Gemini AI</strong>, configurez votre clé API <code>GEMINI_API_KEY</code> dans le fichier <code>.env</code>.</p>
+    </div>
+    <span style="font-size: 28px;">⚡</span>
+</div>
+{% endif %}
+
+<!-- Liste d'historique -->
+<div class="glass-card history-section">
+    <h2>Vos simulations d'entretien</h2>
+    
+    {% if sessions %}
+        <div class="history-table-container">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Intitulé du poste</th>
+                        <th>Date de création</th>
+                        <th>Statut</th>
+                        <th>Score d'évaluation</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                        <tr>
+                            <td style="font-weight: 600; color: var(--text-primary);">{{ session.job_title }}</td>
+                            <td>{{ session.created_at.strftime('%d/%m/%Y à %H:%M') }}</td>
+                            <td>
+                                {% if session.status == 'in_progress' %}
+                                    <span class="status-badge in_progress">En cours</span>
+                                {% else %}
+                                    <span class="status-badge completed">Complété</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if session.status == 'completed' %}
+                                    {% if session.overall_score >= 80 %}
+                                        <span class="score-badge high">{{ session.overall_score }}/100</span>
+                                    {% elif session.overall_score >= 60 %}
+                                        <span class="score-badge medium">{{ session.overall_score }}/100</span>
+                                    {% else %}
+                                        <span class="score-badge low">{{ session.overall_score }}/100</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span style="color: var(--text-muted);">Non évalué</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                {% if session.status == 'in_progress' %}
+                                    <a href="/interview/{{ session.id }}" class="btn btn-secondary" style="padding: 6px 14px; font-size: 13px;">Reprendre</a>
+                                {% else %}
+                                    <a href="/interview/{{ session.id }}/results" class="btn btn-primary" style="padding: 6px 14px; font-size: 13px; background: var(--brand-navy); border: 1px solid rgba(255,255,255,0.1); box-shadow: none;">Rapport</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>Vous n'avez pas encore effectué de simulation d'entretien d'embauche.</p>
+            <a href="/interview/new" class="btn btn-primary">Lancer ma première simulation</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

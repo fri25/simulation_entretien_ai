@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Digi'innova. Simulation d'Entretien{% endblock %}</title>
+    <!-- Meta SEO -->
+    <meta name="description" content="Simulez des entretiens d'embauche réalistes et obtenez un retour personnalisé grâce à notre intelligence artificielle ultra-généralisée.">
+    <!-- Favicon optionnelle -->
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎯</text></svg>">
+    <!-- CSS global -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Barre de navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="logo" id="main-logo">
+                Digi'innova<span class="logo-dot"></span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}active{% endif %}">Tableau de bord</a></li>
+                <li><a href="/interview/new" class="nav-link {% if request.url.path == '/interview/new' %}active{% endif %}">Nouvelle simulation</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Zone de contenu -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Scripts globaux -->
+    <script src="/static/js/main.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

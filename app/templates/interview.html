@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Simulation d'Entretien - Digi'innova. Simulation d'Entretien{% endblock %}
+
+{% block content %}
+<!-- Écran de chargement lors du calcul de l'évaluation finale -->
+<div class="loading-screen" id="loading-screen" style="display: none;">
+    <div class="spinner"></div>
+    <h3 id="loading-status-text" style="color: var(--text-primary);">Évaluation en cours par Digi'innova IA...</h3>
+    <p style="color: var(--text-secondary); max-width: 450px; text-align: center; font-size: 14px;">Notre IA analyse la pertinence, la structure et la clarté de vos réponses pour dresser un rapport complet. Cela peut prendre de 5 à 15 secondes.</p>
+</div>
+
+<!-- Stockage des métadonnées de session pour JavaScript -->
+<div id="session-data" 
+     data-session-id="{{ session.id }}" 
+     data-job-title="{{ session.job_title }}" 
+     data-questions-json='[
+        {% for q in questions %}
+            {"id": {{ q.id }}, "question_index": {{ q.question_index }}, "question_text": {{ q.question_text | tojson | safe }}}
+            {% if not loop.last %},{% endif %}
+        {% endfor %}
+     ]'>
+</div>
+
+<div class="interview-layout">
+    <!-- Panneau latéral de progression -->
+    <div class="sidebar-panel">
+        <div class="glass-card">
+            <h3>Entretien</h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; font-weight: 500;">Simulation d'entretien pour le poste de <strong>{{ session.job_title }}</strong></p>
+            
+            <div class="progress-steps">
+                {% for q in questions %}
+                    <div class="step-item" id="step-{{ q.question_index }}">
+                        <div class="step-num">{{ q.question_index + 1 }}</div>
+                        <div class="step-text">Question {{ q.question_index + 1 }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--card-border);">
+                <p style="font-size: 12px; color: var(--text-muted); line-height: 1.4;">Répondez à chaque question de façon détaillée. Une fois la dernière réponse envoyée, l'évaluation complète sera générée.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Espace de discussion principal -->
+    <div class="chat-workspace glass-card" style="padding: 24px 24px 16px 24px;">
+        <!-- Messages -->
+        <div class="chat-messages" id="chat-messages">
+            <!-- Les messages et indicateurs de frappe seront générés dynamiquement en JS -->
+        </div>
+
+        <!-- Saisie utilisateur -->
+        <div class="chat-input-area">
+            <div class="textarea-container">
+                <textarea id="candidate-answer" class="chat-textarea" placeholder="Rédigez votre réponse ici..." maxlength="1500" disabled></textarea>
+                <div class="char-counter" id="char-count">0 / 1500</div>
+            </div>
+            
+            <div class="input-actions">
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Conseil : Rédigez au moins 3-4 phrases pour obtenir une évaluation approfondie.</span>
+                <button id="btn-send" class="btn btn-primary" style="padding: 10px 24px;" disabled>Envoyer la réponse</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Script spécifique à la simulation interactive -->
+<script src="/static/js/interview.js"></script>
+{% endblock %}

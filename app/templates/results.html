@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Résultats de la Simulation - Digi'innova. Simulation d'Entretien{% endblock %}
+
+{% block content %}
+<div class="results-header">
+    <h1 style="color: var(--text-primary);">Rapport d'Évaluation</h1>
+    <p style="color: var(--text-secondary); font-size: 16px;">Simulation d'entretien pour le poste de <strong>{{ session.job_title }}</strong> réalisée le {{ session.created_at.strftime('%d/%m/%Y à %H:%M') }}</p>
+</div>
+
+<!-- Score Circulaire Central -->
+<div class="score-circle-container">
+    {% if session.overall_score >= 80 %}
+        <div class="score-circle glowing-green">
+    {% else %}
+        <div class="score-circle glowing-orange">
+    {% endif %}
+        <div class="score-number">{{ session.overall_score }}</div>
+        <div class="score-total">Score sur 100</div>
+    </div>
+</div>
+
+<!-- Avertissement Mode Démo -->
+{% if is_demo %}
+<div class="demo-banner" style="margin-top: -10px; margin-bottom: 40px;">
+    <div class="demo-banner-text">
+        <h3>⚡ Évaluation Simulée (Mode Démo)</h3>
+        <p>Ce rapport a été généré localement car aucune clé API Gemini n'est configurée dans le fichier <code>.env</code>. Le calcul et l'évaluation sont factices. Renseignez votre clé pour activer l'analyse réelle.</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Analyse Synthétique Globale -->
+<div class="glass-card" style="margin-bottom: 32px;">
+    <h3 style="font-size: 22px; margin-bottom: 12px; font-family: 'Outfit'; color: var(--brand-orange);">Synthèse du recruteur Digi'innova</h3>
+    <p style="font-size: 16px; color: var(--text-primary); line-height: 1.7; font-weight: 500;">
+        {{ session.feedback_summary }}
+    </p>
+</div>
+
+<!-- Grille des points forts et axes d'amélioration -->
+<div class="results-grid">
+    <!-- Points forts -->
+    <div class="glass-card">
+        <h3 class="text-strengths">
+            <span style="font-size: 20px;">🏆</span> Points Forts
+        </h3>
+        <div style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+            {% if session.feedback_strengths.startswith('*') or '\n' in session.feedback_strengths %}
+                <!-- Si c'est du markdown/bullet points simples -->
+                <ul class="feedback-bullets">
+                    {% for line in session.feedback_strengths.split('\n') %}
+                        {% if line.strip() %}
+                            <li>{{ line.replace('*', '').strip() }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>{{ session.feedback_strengths }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Axes d'amélioration -->
+    <div class="glass-card">
+        <h3 class="text-improvements">
+            <span style="font-size: 20px;">🚀</span> Axes d'Amélioration
+        </h3>
+        <div style="font-size: 15px; color: var(--text-secondary); line-height: 1.6;">
+            {% if session.feedback_improvements.startswith('*') or '\n' in session.feedback_improvements %}
+                <!-- Si c'est du markdown/bullet points simples -->
+                <ul class="feedback-bullets" style="--brand-orange: var(--brand-orange);">
+                    {% for line in session.feedback_improvements.split('\n') %}
+                        {% if line.strip() %}
+                            <li style="list-style-type: square;">{{ line.replace('*', '').strip() }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>{{ session.feedback_improvements }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Revue détaillée question par question (Accordéons) -->
+<div class="qa-review-section" style="margin-bottom: 40px;">
+    <h2>Détail de l'échange</h2>
+    
+    {% for q in session.questions %}
+        <div class="qa-card" id="qa-card-{{ q.id }}">
+            <div class="qa-header">
+                <div class="qa-title">Question {{ q.question_index + 1 }} : {{ q.question_text }}</div>
+                <div class="qa-header-right">
+                    {% if q.score >= 80 %}
+                        <span class="qa-score score-badge high">{{ q.score }}/100</span>
+                    {% elif q.score >= 60 %}
+                        <span class="qa-score score-badge medium">{{ q.score }}/100</span>
+                    {% else %}
+                        <span class="qa-score score-badge low">{{ q.score }}/100</span>
+                    {% endif %}
+                    <span class="qa-arrow" style="font-size: 14px;">▼</span>
+                </div>
+            </div>
+            
+            <div class="qa-content">
+                <div class="qa-block">
+                    <div class="qa-block-title">Votre réponse</div>
+                    <div class="qa-block-text" style="font-style: italic; background: rgba(255,255,255,0.02); padding: 12px; border-left: 3px solid var(--brand-orange); border-radius: 4px;">
+                        "{{ q.answer_text }}"
+                    </div>
+                </div>
+                
+                <div class="qa-block">
+                    <div class="qa-block-title">Analyse & Conseils de l'IA</div>
+                    <div class="qa-block-text" style="line-height: 1.6;">
+                        {{ q.feedback }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Boutons d'action finaux -->
+<div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 60px;">
+    <a href="/dashboard" class="btn btn-secondary">Retour au tableau de bord</a>
+    <a href="/interview/new" class="btn btn-primary">Lancer un autre entretien</a>
+</div>
+{% endblock %}

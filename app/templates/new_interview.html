@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Nouvelle Simulation - Digi'innova. Simulation d'Entretien{% endblock %}
+
+{% block content %}
+<!-- Écran de chargement lors de la génération des questions -->
+<div class="loading-screen" id="loading-screen">
+    <div class="spinner"></div>
+    <h3 id="loading-status-text">Digi'innova IA pré-programme vos questions personnalisées...</h3>
+    <p style="color: var(--text-secondary); max-width: 400px; text-align: center; font-size: 14px;">Cette étape utilise l'IA pour générer 5 questions sur mesure adaptées précisément au poste indiqué. Veuillez patienter quelques secondes.</p>
+</div>
+
+<div class="form-card-container">
+    <div class="glass-card">
+        <h2>Configurer votre simulation</h2>
+        <p>Notre IA s'adapte à n'importe quel intitulé de poste. Renseignez l'intitulé et éventuellement le descriptif de l'offre d'emploi ou votre profil pour démarrer.</p>
+        
+        <div class="form-alert" id="form-alert" style="margin-bottom: 20px;"></div>
+
+        <form id="new-interview-form" style="display: flex; flex-direction: column; gap: 24px;">
+            <div class="form-group">
+                <label for="job-title">Intitulé du poste ciblé *</label>
+                <input type="text" id="job-title" class="form-input" placeholder="ex: Développeur Python Backend, Chef de Projet Agile, Commercial..." required value="{{ job_title or '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="job-description">Description du poste ou votre profil (Optionnel)</label>
+                <textarea id="job-description" class="form-input" style="min-height: 120px; resize: vertical;" placeholder="Collez l'annonce de l'emploi, vos compétences clés, ou votre CV pour aider l'IA à formuler des questions plus précises et adaptées...">{{ job_description or '' }}</textarea>
+            </div>
+
+            <div style="display: flex; gap: 16px; margin-top: 10px;">
+                <button type="submit" class="btn btn-primary">Générer mon entretien</button>
+                <a href="/dashboard" class="btn btn-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("new-interview-form");
+    const loadingScreen = document.getElementById("loading-screen");
+    const alertBox = document.getElementById("form-alert");
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        alertBox.style.display = "none";
+
+        const jobTitle = document.getElementById("job-title").value.trim();
+        const jobDescription = document.getElementById("job-description").value.trim();
+
+        // 1. Afficher l'écran de chargement
+        loadingScreen.style.display = "flex";
+
+        try {
+            // 2. POST de création d'entretien
+            const response = await fetch("/api/interviews/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    job_title: jobTitle,
+                    job_description: jobDescription
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "La génération de l'entretien a échoué.");
+            }
+
+            // 3. Rediriger vers l'écran de simulation
+            const sessionId = data;
+            window.location.href = `/interview/${sessionId}`;
+
+        } catch (err) {
+            // Cacher l'écran de chargement et afficher l'erreur
+            loadingScreen.style.display = "none";
+            alertBox.textContent = err.message;
+            alertBox.style.display = "block";
+        }
+    });
+});
+</script>
+{% endblock %}
